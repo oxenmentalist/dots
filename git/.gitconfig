@@ -1,7 +1,7 @@
 [includeIf "gitdir:~/"]
 	path = ~/.gitconfig-nl
 
-[includeIf "gitdir:~/src/oxenmentalist/"]
+[includeIf "gitdir:~/src/om/"]
 	path = ~/.gitconfig-om
 
 [push]

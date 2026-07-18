@@ -1,0 +1,17 @@
+[includeIf "gitdir:~/"]
+	path = ~/.gitconfig-nl
+
+[includeIf "gitdir:~/src/oxenmentalist/"]
+	path = ~/.gitconfig-om
+
+[push]
+	autoSetupRemote = true
+	default = current
+[fetch]
+	prune = true
+[pull]
+	rebase = true
+[rebase]
+	autoStash = true
+[init]
+	defaultBranch = main

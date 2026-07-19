@@ -1,12 +1,26 @@
 # better cd
-eval "$(zoxide init zsh)"
+if (( $+commands[zoxide] )); then
+  eval "$(zoxide init zsh)"
+fi
 
 # fzf
-source <(fzf --zsh)
+if (( $+commands[fzf] )); then
+  source <(fzf --zsh)
+fi
 
 # aliases
-alias ls="eza"
-alias ll="eza -lah"
-alias cat="bat"
+if (( $+commands[eza] )); then
+  alias ls="eza"
+  alias ll="eza -lah"
+else
+  alias ll="ls -lah"
+fi
 
+if (( $+commands[bat] )); then
+  alias cat="bat"
+fi
 
+# prompt
+if (( $+commands[starship] )); then
+  eval "$(starship init zsh)"
+fi

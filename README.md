@@ -30,8 +30,8 @@ cd ~/src/om/dots
 
 ## Install Software
 
-Install the command-line tools, Ghostty, and Maple Mono Nerd Font declared in
-the repository's `Brewfile`:
+Install the command-line tools (including the Starship prompt), Ghostty, and
+Maple Mono Nerd Font declared in the repository's `Brewfile`:
 
 ```bash
 brew bundle install

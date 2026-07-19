@@ -1,0 +1,158 @@
+#!/bin/zsh
+
+# Validate the macOS tools and configuration managed by this repository.
+
+setopt NO_UNSET PIPE_FAIL NULL_GLOB
+
+script_dir=${0:A:h}
+repo_dir=${script_dir:h}
+typeset -i passed=0 warnings=0 failed=0
+
+pass() {
+  print -P "%F{green}PASS%f  $1"
+  (( passed++ ))
+}
+
+warn() {
+  print -P "%F{yellow}WARN%f  $1"
+  [[ -n ${2:-} ]] && print "      Fix: $2"
+  (( warnings++ ))
+}
+
+fail() {
+  print -P "%F{red}FAIL%f  $1"
+  [[ -n ${2:-} ]] && print "      Fix: $2"
+  (( failed++ ))
+}
+
+section() {
+  print
+  print -P "%B$1%b"
+}
+
+cd "$repo_dir" || exit 1
+
+section "Dependencies"
+dependencies=(bat eza fzf git nvim starship stow tmux zoxide)
+for dependency in $dependencies; do
+  if (( $+commands[$dependency] )); then
+    pass "$dependency is available"
+  else
+    fail "$dependency is missing" "Run: brew bundle install"
+  fi
+done
+
+if [[ -d /Applications/Ghostty.app || -d $HOME/Applications/Ghostty.app ]]; then
+  pass "Ghostty is installed"
+else
+  fail "Ghostty.app was not found" "Run: brew bundle install"
+fi
+
+section "Font"
+font_files=(
+  $HOME/Library/Fonts/MapleMono-NF*.ttf
+  /Library/Fonts/MapleMono-NF*.ttf
+)
+if (( ${#font_files} )); then
+  pass "Maple Mono NF is installed"
+else
+  fail "Maple Mono NF was not found in a macOS Fonts directory" \
+    "Run: brew reinstall --cask font-maple-mono-nf"
+fi
+
+section "Git identities"
+shared_gitconfig="$repo_dir/git/.gitconfig"
+if [[ $(git config --file "$shared_gitconfig" --get init.defaultBranch 2>/dev/null) == main ]]; then
+  pass "Shared init.defaultBranch is main"
+else
+  fail "Shared init.defaultBranch is not main" \
+    "Set it in git/.gitconfig, not in a private identity file"
+fi
+
+identity_files=(
+  "$HOME/.gitconfig-nl"
+  "$HOME/.gitconfig-om"
+)
+for identity_file in $identity_files; do
+  identity_name=${identity_file:t}
+  if [[ ! -f $identity_file ]]; then
+    fail "$identity_name is missing" "Create it with only user.name and user.email"
+    continue
+  fi
+
+  keys=("${(@f)$(git config --file "$identity_file" --name-only --list 2>/dev/null)}")
+  if (( ${#keys} == 2 )) && (( ${keys[(Ie)user.name]} )) && (( ${keys[(Ie)user.email]} )); then
+    pass "$identity_name contains only user.name and user.email"
+  else
+    fail "$identity_name contains unexpected or missing keys" \
+      "Keep only user.name and user.email in this private file"
+  fi
+done
+
+nl_include=$(git config --file "$shared_gitconfig" --get 'includeIf.gitdir:~/.path' 2>/dev/null)
+om_include=$(git config --file "$shared_gitconfig" --get 'includeIf.gitdir:~/src/om/.path' 2>/dev/null)
+if [[ $nl_include == '~/.gitconfig-nl' && $om_include == '~/.gitconfig-om' ]]; then
+  pass "Conditional identity includes are configured"
+else
+  fail "Conditional identity includes do not match the documented layout" \
+    "Review the includeIf entries in git/.gitconfig"
+fi
+
+section "Configuration syntax"
+if /bin/zsh -n zsh/.zshrc; then
+  pass "Zsh configuration syntax is valid"
+else
+  fail "Zsh configuration has a syntax error" "Run: zsh -n zsh/.zshrc"
+fi
+
+if (( $+commands[tmux] )); then
+  tmux_socket="dots-doctor-$$"
+  if tmux -L "$tmux_socket" -f tmux/.tmux.conf new-session -d 2>/dev/null; then
+    tmux -L "$tmux_socket" kill-server 2>/dev/null || true
+    pass "tmux configuration loads successfully"
+  else
+    fail "tmux configuration could not be loaded" "Run: tmux -f tmux/.tmux.conf"
+  fi
+else
+  warn "tmux syntax check was skipped" "Install dependencies with: brew bundle install"
+fi
+
+section "Stow"
+if (( $+commands[stow] )); then
+  stow_output=$(stow --simulate --verbose=1 git tmux zsh ghostty nvim 2>&1)
+  stow_status=$?
+  if (( stow_status == 0 )); then
+    pass "Stow found no package conflicts"
+  else
+    fail "Stow found a conflict"
+    print -r -- "$stow_output" | sed 's/^/      /'
+    print "      Fix: Move or import the conflicting files, then rerun this script"
+  fi
+else
+  warn "Stow conflict check was skipped" "Install dependencies with: brew bundle install"
+fi
+
+section "Neovim"
+if (( $+commands[nvim] )); then
+  health_output=$(NVIM_LOG_FILE="${TMPDIR:-/tmp}/dots-doctor-nvim-$$.log" \
+    nvim --headless '+checkhealth' '+qa' 2>&1)
+  health_status=$?
+  if (( health_status == 0 )); then
+    if print -r -- "$health_output" | grep -Eiq '(ERROR|FAILED)'; then
+      warn "Neovim health completed with reported errors" \
+        "Open Neovim and run: :checkhealth"
+    else
+      pass "Neovim health check completed"
+    fi
+  else
+    fail "Neovim health check failed" "Open Neovim and run: :checkhealth"
+    [[ -n $health_output ]] && print -r -- "$health_output" | sed 's/^/      /'
+  fi
+else
+  warn "Neovim health check was skipped" "Install dependencies with: brew bundle install"
+fi
+
+section "Summary"
+print "$passed passed, $warnings warnings, $failed failed"
+
+(( failed == 0 ))

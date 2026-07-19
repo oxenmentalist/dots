@@ -44,6 +44,14 @@ machine:
 brew bundle check
 ```
 
+After installation, run the repository doctor to check dependencies, private
+Git identities, the configured font, Stow conflicts, Neovim health, and shell
+configuration syntax:
+
+```bash
+scripts/doctor
+```
+
 The Brewfile is intentionally limited to software required by these dotfiles;
 it is not a snapshot of every Homebrew package installed on the machine.
 
@@ -58,6 +66,8 @@ dots/
 │   └── .config/ghostty/
 ├── nvim/
 │   └── .config/nvim/
+├── scripts/
+│   └── doctor
 ├── tmux/
 │   └── .tmux.conf
 └── zsh/
@@ -105,6 +115,24 @@ stow -D git tmux zsh ghostty nvim
 ## GitHub Accounts
 
 This repository uses the **oxenmentalist** GitHub account.
+
+The shared Git configuration selects between two private identity files:
+
+- `~/.gitconfig-nl` is the default identity for repositories under `~/`.
+- `~/.gitconfig-om` overrides it for repositories under `~/src/om/`.
+
+Create these files directly in the home directory. They are intentionally not
+Stow packages and must not be checked into this public repository. Each file
+contains only its identity:
+
+```gitconfig
+[user]
+	name = Your Name
+	email = your-address@example.com
+```
+
+Shared behavior, including `init.defaultBranch = main`, belongs in the tracked
+`git/.gitconfig` rather than in either private identity file.
 
 Verify the remote:
 

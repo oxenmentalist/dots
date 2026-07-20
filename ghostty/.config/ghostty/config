@@ -1,12 +1,7 @@
-font-family = "Maple Mono NF"
-font-family-italic = "Maple Mono NF"
-font-family-bold-italic = "Maple Mono NF"
-font-style = Medium
-font-style-bold = ExtraBold
-font-style-italic = Light
-font-style-bold-italic = Regular
+font-family = "Fira Code"
 font-size = 16
 font-thicken = 1
+adjust-cell-width = 3%
 
 theme = Kanagawa Wave
 cursor-style = block

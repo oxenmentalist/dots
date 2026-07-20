@@ -50,14 +50,14 @@ fi
 
 section "Font"
 font_files=(
-  $HOME/Library/Fonts/MapleMono-NF*.ttf
-  /Library/Fonts/MapleMono-NF*.ttf
+  $HOME/Library/Fonts/FiraCode-*.ttf
+  /Library/Fonts/FiraCode-*.ttf
 )
 if (( ${#font_files} )); then
-  pass "Maple Mono NF is installed"
+  pass "Fira Code is installed"
 else
-  fail "Maple Mono NF was not found in a macOS Fonts directory" \
-    "Run: brew reinstall --cask font-maple-mono-nf"
+  fail "Fira Code was not found in a macOS Fonts directory" \
+    "Run: brew reinstall --cask font-fira-code"
 fi
 
 section "Git identities"

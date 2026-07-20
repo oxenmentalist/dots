@@ -10,5 +10,5 @@ brew "tmux"
 brew "zoxide"
 
 # macOS applications and fonts referenced by the configuration.
-cask "font-fira-code"
+cask "font-monaspace"
 cask "ghostty"

@@ -50,14 +50,14 @@ fi
 
 section "Font"
 font_files=(
-  $HOME/Library/Fonts/FiraCode-*.ttf
-  /Library/Fonts/FiraCode-*.ttf
+  $HOME/Library/Fonts/MonaspaceNeon-*.otf
+  /Library/Fonts/MonaspaceNeon-*.otf
 )
 if (( ${#font_files} )); then
-  pass "Fira Code is installed"
+  pass "Monaspace Neon is installed"
 else
-  fail "Fira Code was not found in a macOS Fonts directory" \
-    "Run: brew reinstall --cask font-fira-code"
+  fail "Monaspace Neon was not found in a macOS Fonts directory" \
+    "Run: brew reinstall --cask font-monaspace"
 fi
 
 section "Git identities"

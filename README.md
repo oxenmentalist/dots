@@ -31,7 +31,7 @@ cd ~/src/om/dots
 ## Install Software
 
 Install the command-line tools (including the Starship prompt), Ghostty, and
-Fira Code declared in the repository's `Brewfile`:
+Monaspace declared in the repository's `Brewfile`:
 
 ```bash
 brew bundle install
